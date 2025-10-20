@@ -1,9 +1,6 @@
 import Lecture from "../models/Lecture.js";
 import fs from "fs";
 import path from "path";
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse"); // الاستيراد الصحيح مع ESM
 
 // رفع محاضرة جديدة
 export const uploadLecture = async (req, res) => {
@@ -18,16 +15,7 @@ export const uploadLecture = async (req, res) => {
 
     const fileUrl = `uploads/${file.filename}`;
 
-    // محاولة قراءة النص داخل PDF (اختياري)
-    let textContent = "";
-    try {
-      const fileBuffer = fs.readFileSync(file.path);
-      const pdfData = await pdfParse(fileBuffer);
-      textContent = pdfData.text;
-    } catch {
-      console.warn("⚠️ لم يتم استخراج النص من PDF، لكن تم رفع الملف بنجاح");
-    }
-
+    // حفظ المحاضرة في قاعدة البيانات بدون محاولة استخراج النص
     const lecture = await Lecture.create({
       title,
       subject,
@@ -35,8 +23,7 @@ export const uploadLecture = async (req, res) => {
       stage,
       fileUrl,
       uploadedBy,
-      textContent, // ← هنا تحفظ نص PDF
-
+      textContent: "" // تركه فارغ لأننا لم نستخرج النص
     });
 
     res.status(201).json({ message: "✅ تم رفع المحاضرة بنجاح", lecture });
