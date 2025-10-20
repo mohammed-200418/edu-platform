@@ -55,9 +55,10 @@ app.use(express.static(path.join(__dirname, "../edu-frontend/build")));
 
 // أي طلب غير API يرجع index.html من واجهة React
 // تم تعديل "*" إلى "/*" لتجنب خطأ path-to-regexp
-app.get("/*", (req, res) => {
+app.get("/:pathMatch(.*)*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "../edu-frontend/build", "index.html"));
 });
+
 
 // 🧩 تشغيل السيرفر
 const PORT = process.env.PORT || 5000;
