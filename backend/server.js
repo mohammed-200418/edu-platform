@@ -53,12 +53,11 @@ const __dirname = path.dirname(__filename);
 // هذا المسار يخلي السيرفر يعرض ملفات React الجاهزة (build)
 app.use(express.static(path.join(__dirname, "../edu-frontend/build")));
 
-// أي طلب غير API يرجع index.html من واجهة React
-// تم تعديل "*" إلى "/*" لتجنب خطأ path-to-regexp
-app.get("/:pathMatch(.*)*", (req, res) => {
+// أي طلب غير API يُرسل index.html من واجهة React
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api")) return next(); // اترك الـ API requests
   res.sendFile(path.resolve(__dirname, "../edu-frontend/build", "index.html"));
 });
-
 
 // 🧩 تشغيل السيرفر
 const PORT = process.env.PORT || 5000;
