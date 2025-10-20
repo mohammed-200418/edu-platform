@@ -1,4 +1,11 @@
 {
+  "name": "edu-platform",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && npm start",
+    "build-frontend": "cd edu-frontend && npm install && npm run build",
+    "deploy": "npm run build-frontend && cd backend && npm start"
+  },
   "dependencies": {
     "openai": "^6.3.0"
   },

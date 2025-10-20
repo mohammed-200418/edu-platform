@@ -4,6 +4,7 @@ import 'dotenv/config'; // ← هذا يحل مشكلة OpenAI API Key
 import express from "express";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/authRoutes.js";
 import lectureRoutes from "./routes/lectureRoutes.js";
@@ -31,7 +32,7 @@ console.log("OpenAI API Key:", process.env.OPENAI_API_KEY ? "FOUND" : "NOT FOUND
 connectDB();
 
 // 🧩 راوت تجريبي
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.send("🚀 منصة التعليم الإلكتروني تعمل بنجاح - محمد ميثاق");
 });
 
@@ -39,11 +40,23 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/questions", questionRoutes);
-app.use("/api/ai", aiRoutes); // ← بعد questionRoutes
-app.use("/api/users", userRoutes); // ربط الحسابات بصفحة الادمن
+app.use("/api/ai", aiRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/stages", stageRoutes);
 app.use("/api/metadata", metadataRoutes);
 app.use("/api/source", sourceRoutes);
+
+// 🧱 إعداد المسارات الثابتة للـ Frontend بعد البناء
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// هذا المسار يخلي السيرفر يعرض ملفات React الجاهزة (build)
+app.use(express.static(path.join(__dirname, "../edu-frontend/build")));
+
+// أي طلب غير API يرجع index.html من واجهة React
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "../edu-frontend/build", "index.html"));
+});
 
 // 🧩 تشغيل السيرفر
 const PORT = process.env.PORT || 5000;
