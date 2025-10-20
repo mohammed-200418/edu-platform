@@ -54,7 +54,8 @@ const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "../edu-frontend/build")));
 
 // أي طلب غير API يرجع index.html من واجهة React
-app.get("*", (req, res) => {
+// تم تعديل "*" إلى "/*" لتجنب خطأ path-to-regexp
+app.get("/*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "../edu-frontend/build", "index.html"));
 });
 
