@@ -10,10 +10,11 @@ export default function AdminQuestions() {
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app";
 
   const fetchQuestions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/questions", {
+      const res = await axios.get(`${SERVER_URL}/api/questions`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setQuestions(res.data);
@@ -33,7 +34,7 @@ export default function AdminQuestions() {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/questions/${id}/reply`,
+        `${SERVER_URL}/api/questions/${id}/reply`,
         { text: replyText.trim() },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -54,7 +55,7 @@ export default function AdminQuestions() {
   const hideQuestion = async (questionId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/questions/${questionId}/hide`,
+        `${SERVER_URL}/api/questions/${questionId}/hide`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -68,7 +69,7 @@ export default function AdminQuestions() {
     if (!window.confirm("هل تريد حذف السؤال نهائيًا؟")) return;
     try {
       await axios.delete(
-        `http://localhost:5000/api/questions/${questionId}`,
+        `${SERVER_URL}/api/questions/${questionId}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       fetchQuestions();

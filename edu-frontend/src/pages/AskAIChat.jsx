@@ -14,6 +14,9 @@ export default function AskAIChat() {
   const user = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user"));
   const token = user?.token;
 
+  // 🔗 رابط السيرفر على Railway
+  const BASE_URL = "https://edu-platform-production-7a03.up.railway.app";
+
   // جلب metadata والمصادر عند التحميل
   useEffect(() => {
     if (!token) return;
@@ -21,8 +24,12 @@ export default function AskAIChat() {
     const fetchData = async () => {
       try {
         const [metaRes, srcRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/source/metadata", { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get("http://localhost:5000/api/source/subjects", { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${BASE_URL}/api/source/metadata`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`${BASE_URL}/api/source/subjects`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
         ]);
         setMetadata(metaRes.data || {});
         setSources(srcRes.data || {});
@@ -36,16 +43,19 @@ export default function AskAIChat() {
   }, [token]);
 
   // تحديث قائمة المصادر عند اختيار القسم/المرحلة/المادة
-  const currentSources = department && stage && subject
-    ? sources?.[department]?.[stage]?.[subject] || []
-    : [];
+  const currentSources =
+    department && stage && subject
+      ? sources?.[department]?.[stage]?.[subject] || []
+      : [];
 
   const handleAsk = async () => {
-    if (!question || !department || !stage || !subject) return alert("اختر المادة واكتب السؤال");
+    if (!question || !department || !stage || !subject)
+      return alert("اختر المادة واكتب السؤال");
 
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/ai/ask", 
+      const res = await axios.post(
+        `${BASE_URL}/api/ai/ask`,
         { question, department, stage, subject },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -67,30 +77,69 @@ export default function AskAIChat() {
       <h1 className="text-2xl font-bold mb-4">اسأل المساعد الذكي</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <select value={department} onChange={e => { setDepartment(e.target.value); setStage(""); setSubject(""); }}>
+        <select
+          value={department}
+          onChange={(e) => {
+            setDepartment(e.target.value);
+            setStage("");
+            setSubject("");
+          }}
+        >
           <option value="">اختر القسم</option>
-          {departments.map(d => <option key={d} value={d}>{d}</option>)}
+          {departments.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
         </select>
 
-        <select value={stage} onChange={e => { setStage(e.target.value); setSubject(""); }}>
+        <select
+          value={stage}
+          onChange={(e) => {
+            setStage(e.target.value);
+            setSubject("");
+          }}
+        >
           <option value="">اختر المرحلة</option>
-          {stages.map(s => <option key={s} value={s}>{s}</option>)}
+          {stages.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
 
-        <select value={subject} onChange={e => setSubject(e.target.value)}>
+        <select
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+        >
           <option value="">اختر المادة</option>
-          {subjects.map(s => <option key={s} value={s}>{s}</option>)}
+          {subjects.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
       </div>
 
       <div className="mb-4">
-        <label className="block font-semibold mb-1">المصادر المتاحة لهذه المادة</label>
+        <label className="block font-semibold mb-1">
+          المصادر المتاحة لهذه المادة
+        </label>
         {currentSources.length === 0 ? (
           <p className="text-gray-600">لا توجد مصادر مضافة لهذه المادة.</p>
         ) : (
           <ul className="space-y-2">
             {currentSources.map((link, i) => (
-              <li key={i}><a href={link} target="_blank" rel="noreferrer" className="text-blue-600 break-all">{link}</a></li>
+              <li key={i}>
+                <a
+                  href={link}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 break-all"
+                >
+                  {link}
+                </a>
+              </li>
             ))}
           </ul>
         )}
@@ -100,7 +149,7 @@ export default function AskAIChat() {
         className="w-full border p-2 h-28 mb-2"
         placeholder="اكتب سؤالك هنا..."
         value={question}
-        onChange={e => setQuestion(e.target.value)}
+        onChange={(e) => setQuestion(e.target.value)}
       />
 
       <button

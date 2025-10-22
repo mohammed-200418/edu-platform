@@ -9,22 +9,26 @@ export default function AdminAccounts() {
   const [students, setStudents] = useState([]);
 
   // صلاحيات حسب الدور/التسميات
-  const allowedRoles = ["admin"]; // أدمن فقط
-  const allowedDesignations = ["مدير الحسابات"]; // يمكن تعديل التسميات هنا
+  const allowedRoles = ["admin"]; // فقط الأدمن
+  const allowedDesignations = ["مدير الحسابات"]; // يمكنك تعديلها إذا تريد
 
   // فحص صلاحيات المستخدم
   const hasAccess =
-    allowedRoles.includes(user.role) ||
-    (user.designation && user.designation.some(d => allowedDesignations.includes(d)));
+    allowedRoles.includes(user?.role) ||
+    (user?.designation && user.designation.some((d) => allowedDesignations.includes(d)));
+
+  // 🔗 رابط السيرفر على Railway
+  const BASE_URL = "https://edu-platform-production-7a03.up.railway.app";
 
   const fetchStudents = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/users/all", {
+      const res = await axios.get(`${BASE_URL}/api/users/all`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setStudents(res.data);
     } catch (err) {
-      alert(err.response?.data?.message || "حدث خطأ");
+      console.error(err);
+      alert(err.response?.data?.message || "حدث خطأ أثناء جلب المستخدمين");
     }
   };
 
@@ -35,24 +39,26 @@ export default function AdminAccounts() {
   const changeRole = async (id, newRole) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/users/change-role/${id}`,
+        `${BASE_URL}/api/users/change-role/${id}`,
         { role: newRole },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       fetchStudents();
     } catch (err) {
-      alert(err.response?.data?.message || "حدث خطأ");
+      console.error(err);
+      alert(err.response?.data?.message || "حدث خطأ أثناء تغيير الدور");
     }
   };
 
   const deleteUser = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/users/${id}`, {
+      await axios.delete(`${BASE_URL}/api/users/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       fetchStudents();
     } catch (err) {
-      alert(err.response?.data?.message || "حدث خطأ");
+      console.error(err);
+      alert(err.response?.data?.message || "حدث خطأ أثناء حذف المستخدم");
     }
   };
 
@@ -80,32 +86,36 @@ export default function AdminAccounts() {
       <h1 className="text-4xl font-bold mb-6">إدارة الحسابات</h1>
 
       <div className="max-h-96 overflow-y-auto bg-white text-gray-800 p-6 rounded-xl shadow-lg">
-        {students.map((s) => (
-          <div
-            key={s._id}
-            className="mb-2 p-2 border rounded flex justify-between items-center"
-          >
-            <p>
-              {s.name} - {s.email} - {s.role}
-            </p>
-            <div className="flex gap-2">
-              <button
-                className="bg-blue-500 text-white px-2 rounded"
-                onClick={() =>
-                  changeRole(s._id, s.role === "student" ? "admin" : "student")
-                }
-              >
-                تغيير الدور
-              </button>
-              <button
-                className="bg-red-500 text-white px-2 rounded"
-                onClick={() => deleteUser(s._id)}
-              >
-                حذف
-              </button>
+        {students.length === 0 ? (
+          <p className="text-center text-gray-500">لا يوجد مستخدمين حالياً.</p>
+        ) : (
+          students.map((s) => (
+            <div
+              key={s._id}
+              className="mb-2 p-2 border rounded flex justify-between items-center"
+            >
+              <p>
+                <strong>{s.name}</strong> - {s.email} - <span className="italic">{s.role}</span>
+              </p>
+              <div className="flex gap-2">
+                <button
+                  className="bg-blue-500 text-white px-2 rounded hover:bg-blue-600"
+                  onClick={() =>
+                    changeRole(s._id, s.role === "student" ? "admin" : "student")
+                  }
+                >
+                  تغيير الدور
+                </button>
+                <button
+                  className="bg-red-500 text-white px-2 rounded hover:bg-red-600"
+                  onClick={() => deleteUser(s._id)}
+                >
+                  حذف
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

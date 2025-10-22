@@ -16,6 +16,8 @@ export default function AdminManageSources() {
   const user = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user"));
   const token = user?.token;
 
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app";
+
   // جلب البيانات الأساسية
   useEffect(() => {
     if (!token) {
@@ -27,10 +29,10 @@ export default function AdminManageSources() {
     const fetchAll = async () => {
       try {
         const [metaRes, srcRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/source/metadata", {
+          axios.get(`${SERVER_URL}/api/source/metadata`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:5000/api/source/subjects", {
+          axios.get(`${SERVER_URL}/api/source/subjects`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -51,7 +53,6 @@ export default function AdminManageSources() {
   const stages = department ? Object.keys(metadata[department] || {}) : [];
   const subjects = department && stage ? metadata[department][stage] : [];
 
-  // تحميل المصادر الحالية عند تغيير القسم أو المرحلة أو المادة
   const loadCurrentSources = () => {
     const list = sources?.[department]?.[stage]?.[subject] || [];
     setSourcesText(list.join("\n"));
@@ -61,13 +62,12 @@ export default function AdminManageSources() {
     loadCurrentSources();
   }, [department, stage, subject, sources]);
 
-  // تحديث قائمة المصادر بالكامل
   const handleUpdate = async () => {
     if (!department || !stage || !subject) return alert("اختر القسم والمرحلة والمادة");
     const arr = sourcesText.split("\n").map(s => s.trim()).filter(Boolean);
     try {
       await axios.post(
-        "http://localhost:5000/api/source/subjects/update",
+        `${SERVER_URL}/api/source/subjects/update`,
         { department, stage, subject, sources: arr },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -79,12 +79,11 @@ export default function AdminManageSources() {
     }
   };
 
-  // إضافة رابط مصدر جديد
   const handleAddLink = async () => {
     if (!newLink || !department || !stage || !subject) return alert("املأ الحقول أولا");
     try {
       await axios.post(
-        "http://localhost:5000/api/source/subjects/add",
+        `${SERVER_URL}/api/source/subjects/add`,
         { department, stage, subject, source: newLink },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -96,12 +95,11 @@ export default function AdminManageSources() {
     }
   };
 
-  // حذف مصدر
   const handleDelete = async (idx, url) => {
     if (!window.confirm("هل تريد حذف هذا المصدر؟")) return;
     try {
       await axios.delete(
-        "http://localhost:5000/api/source/subjects/delete",
+        `${SERVER_URL}/api/source/subjects/delete`,
         { data: { department, stage, subject, index: idx, url }, headers: { Authorization: `Bearer ${token}` } }
       );
       loadCurrentSources();
@@ -111,7 +109,6 @@ export default function AdminManageSources() {
     }
   };
 
-  // رفع ملف PDF كمصدر
   const handleFileUpload = async () => {
     if (!file || !department || !stage || !subject) return alert("اختر ملفاً والحقول المطلوبة");
     const form = new FormData();
@@ -120,7 +117,7 @@ export default function AdminManageSources() {
     form.append("stage", stage);
     form.append("subject", subject);
     try {
-      await axios.post("http://localhost:5000/api/source/subjects/upload-file", form, {
+      await axios.post(`${SERVER_URL}/api/source/subjects/upload-file`, form, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
       });
       setFile(null);

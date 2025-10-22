@@ -4,11 +4,17 @@ import axios from "axios";
 export default function Dashboard() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [lectures, setLectures] = useState([]);
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app";
 
   useEffect(() => {
     const fetchLectures = async () => {
-      const res = await axios.get(`http://localhost:5000/api/lectures/${user.section}/${user.stage}`);
-      setLectures(res.data);
+      try {
+        const res = await axios.get(`${SERVER_URL}/api/lectures/${user.section}/${user.stage}`);
+        setLectures(res.data);
+      } catch (err) {
+        console.error("خطأ في جلب المحاضرات:", err.response?.data || err.message);
+        alert("❌ فشل جلب المحاضرات. تحقق من السيرفر أو الإنترنت.");
+      }
     };
     fetchLectures();
   }, [user.section, user.stage]);
@@ -22,8 +28,14 @@ export default function Dashboard() {
           <div key={lec._id} className="p-4 border rounded shadow">
             <h3 className="font-bold">{lec.title}</h3>
             <p>المادة: {lec.subject}</p>
-            <a href={lec.fileUrl} target="_blank" rel="noopener noreferrer"
-               className="text-blue-500 underline mt-2 inline-block">فتح المحاضرة</a>
+            <a
+              href={lec.fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline mt-2 inline-block"
+            >
+              فتح المحاضرة
+            </a>
           </div>
         ))}
       </div>

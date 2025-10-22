@@ -11,10 +11,11 @@ export default function StudentQuestions() {
 
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app";
 
   const fetchMyQuestions = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/questions/my", {
+      const res = await axios.get(`${SERVER_URL}/api/questions/my`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setQuestions(res.data);
@@ -31,7 +32,7 @@ export default function StudentQuestions() {
     if (!newQuestion.trim()) return alert("أدخل السؤال أولاً");
     try {
       await axios.post(
-        "http://localhost:5000/api/questions",
+        `${SERVER_URL}/api/questions`,
         { text: newQuestion.trim() },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -46,7 +47,7 @@ export default function StudentQuestions() {
     if (!replyText.trim()) return alert("أدخل الرد أولاً");
     try {
       await axios.post(
-        `http://localhost:5000/api/questions/${questionId}/reply`,
+        `${SERVER_URL}/api/questions/${questionId}/reply`,
         { text: replyText },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -67,7 +68,7 @@ export default function StudentQuestions() {
   const hideQuestion = async (questionId) => {
     try {
       await axios.put(
-        `http://localhost:5000/api/questions/${questionId}/hide`,
+        `${SERVER_URL}/api/questions/${questionId}/hide`,
         {},
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -81,7 +82,7 @@ export default function StudentQuestions() {
     if (!window.confirm("هل تريد حذف السؤال نهائيًا؟")) return;
     try {
       await axios.delete(
-        `http://localhost:5000/api/questions/${questionId}`,
+        `${SERVER_URL}/api/questions/${questionId}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
       fetchMyQuestions();

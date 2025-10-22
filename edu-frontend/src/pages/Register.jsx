@@ -13,11 +13,13 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app"; // رابط السيرفر
+
   // جلب الأقسام عند التحميل
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/stages");
+        const res = await axios.get(`${SERVER_URL}/api/stages`);
         const uniqueDeps = [...new Set(res.data.map(s => s.department.trim()))];
         setDepartmentsOptions(uniqueDeps);
       } catch (err) {
@@ -32,7 +34,7 @@ export default function Register() {
     if (!department) return setStagesOptions([]);
     const fetchStages = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/stages");
+        const res = await axios.get(`${SERVER_URL}/api/stages`);
         const filteredStages = res.data
           .filter(s => s.department?.trim() === department.trim())
           .map(s => s.stage);
@@ -54,7 +56,7 @@ export default function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+      await axios.post(`${SERVER_URL}/api/auth/register`, {
         name, email, password, department, stage
       });
       alert("تم التسجيل بنجاح! يرجى تسجيل الدخول");

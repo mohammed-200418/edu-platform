@@ -9,6 +9,8 @@ export default function StudentMaterials() {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [lectures, setLectures] = useState([]);
 
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app";
+
   // جلب بيانات المستخدم والمواد
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user"));
@@ -21,7 +23,7 @@ export default function StudentMaterials() {
 
     const fetchSubjects = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/stages", {
+        const res = await axios.get(`${SERVER_URL}/api/stages`, {
           headers: { Authorization: `Bearer ${storedUser.token}` },
         });
 
@@ -48,19 +50,17 @@ export default function StudentMaterials() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/lectures/${encodeURIComponent(user.department)}/${encodeURIComponent(user.stage)}`,
+        `${SERVER_URL}/api/lectures/${encodeURIComponent(user.department)}/${encodeURIComponent(user.stage)}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
 
       const filteredLectures = res.data.filter((lec) => lec.subject === selectedSubject);
 
       const lecturesWithInfo = filteredLectures.map((lec) => {
-        const fileName = lec.fileUrl ? lec.fileUrl.split("\\").pop() : "";
+        const fileName = lec.fileUrl ? lec.fileUrl.split("/").pop() : "";
         return {
           ...lec,
-          fileUrl: lec.fileUrl
-            ? `http://localhost:5000/uploads/${fileName}`
-            : null,
+          fileUrl: lec.fileUrl ? `${SERVER_URL}/uploads/${fileName}` : null,
           fileName,
           fileSize: lec.fileSize || null,
         };

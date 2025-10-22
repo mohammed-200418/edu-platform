@@ -8,9 +8,11 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app"; // رابط السيرفر
+
   const handleLogin = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const res = await axios.post(`${SERVER_URL}/api/auth/login`, { email, password });
       const userData = res.data;
 
       // حفظ بيانات المستخدم كاملة
@@ -57,6 +59,17 @@ export default function Login() {
         >
           دخول
         </button>
+
+        {/* زر الانتقال لصفحة التسجيل */}
+        <p className="mt-4 text-center text-gray-600">
+          ليس لديك حساب؟{" "}
+          <button
+            className="text-blue-500 underline hover:text-blue-700"
+            onClick={() => navigate("/register")}
+          >
+            تسجيل جديد
+          </button>
+        </p>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 export default function AdminStages() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user"));
+  const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app";
 
   const [departments] = useState(["التمريض", "التحليلات", "الصيدلة"]); // الأقسام
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -16,7 +17,7 @@ export default function AdminStages() {
   // جلب المراحل حسب القسم
   const fetchStages = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/stages", {
+      const res = await axios.get(`${SERVER_URL}/api/stages`, {
         headers: { Authorization: `Bearer ${user.token}` }
       });
       setStages(res.data.filter(s => s.department === selectedDepartment));
@@ -42,7 +43,7 @@ export default function AdminStages() {
     try {
       const updatedSubjects = [...subjects, newSubject.trim()];
       await axios.put(
-        `http://localhost:5000/api/stages/${selectedStage}`,
+        `${SERVER_URL}/api/stages/${selectedStage}`,
         { subjects: updatedSubjects },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
@@ -59,7 +60,7 @@ export default function AdminStages() {
     try {
       const updatedSubjects = subjects.filter(s => s !== subject);
       await axios.put(
-        `http://localhost:5000/api/stages/${selectedStage}`,
+        `${SERVER_URL}/api/stages/${selectedStage}`,
         { subjects: updatedSubjects },
         { headers: { Authorization: `Bearer ${user.token}` } }
       );

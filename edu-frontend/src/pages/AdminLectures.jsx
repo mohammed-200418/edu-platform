@@ -21,14 +21,15 @@ export default function AdminLectures() {
   });
   const [errors, setErrors] = useState({});
 
+  const BASE_URL = "https://edu-platform-production-7a03.up.railway.app";
   const departmentsOptions = [...new Set(stages.map((s) => s.department))];
 
-  // جلب المراحل مع حماية من التعديل بعد unmount
+  // جلب المراحل
   useEffect(() => {
     let isMounted = true;
     const fetchStages = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/stages", {
+        const res = await axios.get(`${BASE_URL}/api/stages`, {
           headers: { Authorization: `Bearer ${user?.token}` },
         });
         if (isMounted) setStages(res.data);
@@ -38,7 +39,9 @@ export default function AdminLectures() {
       }
     };
     fetchStages();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [user?.token]);
 
   // تحديث المواد عند اختيار المرحلة
@@ -55,14 +58,14 @@ export default function AdminLectures() {
     }
   }, [selectedStage, selectedDepartment, stages]);
 
-  // جلب المحاضرات مع حماية من التعديل بعد unmount
+  // جلب المحاضرات
   useEffect(() => {
     let isMounted = true;
     const fetchLectures = async () => {
       if (!selectedDepartment || !selectedStage || !selectedSubject) return;
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/lectures/${encodeURIComponent(selectedDepartment)}/${encodeURIComponent(selectedStage)}`,
+          `${BASE_URL}/api/lectures/${encodeURIComponent(selectedDepartment)}/${encodeURIComponent(selectedStage)}`,
           { headers: { Authorization: `Bearer ${user.token}` } }
         );
         if (isMounted) setLectures(res.data.filter((lec) => lec.subject === selectedSubject));
@@ -72,7 +75,9 @@ export default function AdminLectures() {
       }
     };
     fetchLectures();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [selectedDepartment, selectedStage, selectedSubject, user.token]);
 
   // رفع المحاضرة
@@ -98,18 +103,18 @@ export default function AdminLectures() {
       formData.append("file", lectureForm.file);
       formData.append("uploadedBy", user._id);
 
-      await axios.post("http://localhost:5000/api/lectures/upload", formData, {
+      await axios.post(`${BASE_URL}/api/lectures/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data", Authorization: `Bearer ${user.token}` },
       });
 
       setLectureForm({ ...lectureForm, title: "", file: null });
+
       // إعادة جلب المحاضرات بعد الرفع
-      let isMounted = true;
       const res = await axios.get(
-        `http://localhost:5000/api/lectures/${encodeURIComponent(selectedDepartment)}/${encodeURIComponent(selectedStage)}`,
+        `${BASE_URL}/api/lectures/${encodeURIComponent(selectedDepartment)}/${encodeURIComponent(selectedStage)}`,
         { headers: { Authorization: `Bearer ${user.token}` } }
       );
-      if (isMounted) setLectures(res.data.filter((lec) => lec.subject === selectedSubject));
+      setLectures(res.data.filter((lec) => lec.subject === selectedSubject));
     } catch (err) {
       console.error(err);
       alert("حدث خطأ أثناء رفع المحاضرة");
@@ -119,7 +124,7 @@ export default function AdminLectures() {
   const deleteLecture = async (id) => {
     if (!window.confirm("هل أنت متأكد من حذف هذه المحاضرة؟")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/lectures/delete/${id}`, {
+      await axios.delete(`${BASE_URL}/api/lectures/delete/${id}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setLectures((prev) => prev.filter((lec) => lec._id !== id));
@@ -167,7 +172,9 @@ export default function AdminLectures() {
           >
             <option value="">اختر القسم</option>
             {departmentsOptions.map((dep) => (
-              <option key={dep} value={dep}>{dep}</option>
+              <option key={dep} value={dep}>
+                {dep}
+              </option>
             ))}
           </select>
           {errors.department && <p className="text-red-300 mt-1">{errors.department}</p>}
@@ -181,9 +188,13 @@ export default function AdminLectures() {
               onChange={(e) => setSelectedStage(e.target.value)}
             >
               <option value="">اختر المرحلة</option>
-              {stages.filter((s) => s.department === selectedDepartment).map((s) => (
-                <option key={s.stage} value={s.stage}>{s.stage}</option>
-              ))}
+              {stages
+                .filter((s) => s.department === selectedDepartment)
+                .map((s) => (
+                  <option key={s.stage} value={s.stage}>
+                    {s.stage}
+                  </option>
+                ))}
             </select>
             {errors.stage && <p className="text-red-300 mt-1">{errors.stage}</p>}
           </div>
@@ -198,7 +209,9 @@ export default function AdminLectures() {
             >
               <option value="">اختر المادة</option>
               {subjectsOptions.map((sub) => (
-                <option key={sub} value={sub}>{sub}</option>
+                <option key={sub} value={sub}>
+                  {sub}
+                </option>
               ))}
             </select>
             {errors.subject && <p className="text-red-300 mt-1">{errors.subject}</p>}
@@ -239,7 +252,7 @@ export default function AdminLectures() {
                   <h3 className="font-bold text-lg mb-2">{lec.title}</h3>
                   {lec.fileUrl && (
                     <a
-                      href={`http://localhost:5000/${lec.fileUrl}`}
+                      href={`${BASE_URL}/${lec.fileUrl}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-blue-500 underline mr-4"
