@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -10,15 +10,25 @@ export default function Login() {
 
   const SERVER_URL = "https://edu-platform-production-7a03.up.railway.app"; // رابط السيرفر
 
+  // ===== إعادة التوجيه التلقائي إذا المستخدم مسجل دخول =====
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      if (user.role === "admin") navigate("/admin-dashboard");
+      else navigate("/student-dashboard");
+    }
+  }, [navigate]);
+
   const handleLogin = async () => {
     try {
       const res = await axios.post(`${SERVER_URL}/api/auth/login`, { email, password });
       const userData = res.data;
 
-      // حفظ بيانات المستخدم كاملة
+      // حفظ بيانات المستخدم كاملة في localStorage
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("token", userData.token);
 
+      // توجيه المستخدم حسب دوره
       if (userData.role === "admin") navigate("/admin-dashboard");
       else navigate("/student-dashboard");
     } catch (err) {
@@ -32,9 +42,11 @@ export default function Login() {
         <h2 className="text-2xl font-bold mb-6 text-center">تسجيل الدخول</h2>
 
         <input
-          type="email" placeholder="البريد"
+          type="email"
+          placeholder="البريد"
           className="w-full p-3 mb-4 border rounded-lg"
-          value={email} onChange={e => setEmail(e.target.value)}
+          value={email}
+          onChange={e => setEmail(e.target.value)}
         />
 
         <div className="relative mb-4">
@@ -42,7 +54,8 @@ export default function Login() {
             type={showPassword ? "text" : "password"}
             placeholder="كلمة المرور"
             className="w-full p-3 border rounded-lg"
-            value={password} onChange={e => setPassword(e.target.value)}
+            value={password}
+            onChange={e => setPassword(e.target.value)}
           />
           <button
             type="button"
